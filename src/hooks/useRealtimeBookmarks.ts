@@ -39,64 +39,81 @@ export function useRealtimeBookmarks() {
         fetchBookmarks();
 
         // 2. Build the channel with Broadcast + Postgres Changes listeners
-        const channel = supabase
-            .channel("bookmark-sync")
-            .on("broadcast", { event: "bookmark-added" }, (payload) => {
-                console.log("Broadcast: bookmark-added received", payload);
-                const newBookmark = payload.payload as Bookmark;
-                setBookmarks((prev) => {
-                    if (prev.some((b) => b.id === newBookmark.id)) return prev;
-                    return [newBookmark, ...prev];
-                });
-            })
-            .on("broadcast", { event: "bookmark-deleted" }, (payload) => {
-                console.log("Broadcast: bookmark-deleted received", payload);
-                const deletedId = payload.payload.id as string;
-                setBookmarks((prev) => prev.filter((b) => b.id !== deletedId));
-            })
-            .on(
-                "postgres_changes",
-                {
-                    event: "*",
-                    schema: "public",
-                    table: "bookmarks",
-                },
-                (payload) => {
-                    console.log("Postgres Changes event received:", payload);
-                    if (payload.eventType === "INSERT") {
-                        const newBookmark = payload.new as Bookmark;
-                        setBookmarks((prev) => {
-                            if (prev.some((b) => b.id === newBookmark.id)) return prev;
-                            return [newBookmark, ...prev];
-                        });
-                    } else if (payload.eventType === "DELETE") {
-                        const oldRecord = payload.old as Record<string, unknown>;
-                        if (oldRecord && oldRecord.id) {
-                            const deletedId = String(oldRecord.id);
-                            setBookmarks((prev) => prev.filter((b) => b.id !== deletedId));
+        const setupSubscription = async () => {
+            // Get the current session to ensure we have the token
+            const { data: { session } } = await supabase.auth.getSession();
+
+            const channel = supabase
+                .channel("bookmark-sync", {
+                    config: {
+                        presence: {
+                            key: session?.user?.id,
+                        },
+                    },
+                })
+                .on("broadcast", { event: "bookmark-added" }, (payload) => {
+                    console.log("Broadcast: bookmark-added received", payload);
+                    const newBookmark = payload.payload as Bookmark;
+                    setBookmarks((prev) => {
+                        if (prev.some((b) => b.id === newBookmark.id)) return prev;
+                        return [newBookmark, ...prev];
+                    });
+                })
+                .on("broadcast", { event: "bookmark-deleted" }, (payload) => {
+                    console.log("Broadcast: bookmark-deleted received", payload);
+                    const deletedId = payload.payload.id as string;
+                    setBookmarks((prev) => prev.filter((b) => b.id !== deletedId));
+                })
+                .on(
+                    "postgres_changes",
+                    {
+                        event: "*",
+                        schema: "public",
+                        table: "bookmarks",
+                    },
+                    (payload) => {
+                        console.log("Postgres Changes event received:", payload);
+                        if (payload.eventType === "INSERT") {
+                            const newBookmark = payload.new as Bookmark;
+                            setBookmarks((prev) => {
+                                if (prev.some((b) => b.id === newBookmark.id)) return prev;
+                                return [newBookmark, ...prev];
+                            });
+                        } else if (payload.eventType === "DELETE") {
+                            const oldRecord = payload.old as Record<string, unknown>;
+                            if (oldRecord && oldRecord.id) {
+                                const deletedId = String(oldRecord.id);
+                                setBookmarks((prev) => prev.filter((b) => b.id !== deletedId));
+                            }
+                        } else if (payload.eventType === "UPDATE") {
+                            const updatedBookmark = payload.new as Bookmark;
+                            setBookmarks((prev) =>
+                                prev.map((b) => b.id === updatedBookmark.id ? updatedBookmark : b)
+                            );
                         }
-                    } else if (payload.eventType === "UPDATE") {
-                        const updatedBookmark = payload.new as Bookmark;
-                        setBookmarks((prev) =>
-                            prev.map((b) => b.id === updatedBookmark.id ? updatedBookmark : b)
-                        );
                     }
-                }
-            );
+                );
 
-        // Store channel ref BEFORE subscribing so it's available immediately
-        channelRef.current = channel;
+            // Store channel ref BEFORE subscribing so it's available immediately
+            channelRef.current = channel;
 
-        // Now subscribe and track readiness
-        channel.subscribe((status) => {
-            console.log("Realtime subscription status:", status);
-            subscribedRef.current = status === "SUBSCRIBED";
-        });
+            // Now subscribe and track readiness
+            channel.subscribe((status) => {
+                console.log("Realtime subscription status:", status);
+                subscribedRef.current = status === "SUBSCRIBED";
+            });
+        };
+
+        // Call the async subscription setup
+        void setupSubscription();
 
         return () => {
             subscribedRef.current = false;
-            channelRef.current = null;
-            supabase.removeChannel(channel);
+            // Clean up the channel if it exists
+            if (channelRef.current) {
+                supabase.removeChannel(channelRef.current);
+                channelRef.current = null;
+            }
         };
     }, []);
 
