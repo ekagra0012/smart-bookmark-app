@@ -6,7 +6,7 @@ import { useRealtimeBookmarks } from "@/hooks/useRealtimeBookmarks";
 import { Loader2, Bookmark } from "lucide-react";
 
 export function BookmarkList() {
-    const { bookmarks, loading, deleteBookmark } = useRealtimeBookmarks();
+    const { bookmarks, loading, addBookmark, deleteBookmark } = useRealtimeBookmarks();
 
     if (loading) {
         return (
@@ -18,7 +18,7 @@ export function BookmarkList() {
 
     return (
         <div className="space-y-8">
-            <AddBookmarkForm />
+            <AddBookmarkForm onAdd={addBookmark} />
 
             {bookmarks.length === 0 ? (
                 <div className="text-center py-16 bg-muted/30 rounded-2xl border border-dashed border-border flex flex-col items-center justify-center">

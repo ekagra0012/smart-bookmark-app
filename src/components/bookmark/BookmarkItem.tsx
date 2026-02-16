@@ -14,15 +14,13 @@ export function BookmarkItem({ bookmark, onDelete }: BookmarkItemProps) {
     const [isDeleting, setIsDeleting] = useState(false);
 
     const handleDelete = async () => {
-        if (confirm("Are you sure you want to delete this bookmark?")) {
-            setIsDeleting(true);
-            try {
-                await onDelete(bookmark.id);
-            } catch (error) {
-                setIsDeleting(false);
-                console.error("Failed to delete", error);
-                alert("Failed to delete bookmark");
-            }
+        setIsDeleting(true);
+        try {
+            await onDelete(bookmark.id);
+        } catch (error) {
+            setIsDeleting(false);
+            console.error("Failed to delete", error);
+            alert("Failed to delete bookmark");
         }
     };
 
@@ -44,7 +42,7 @@ export function BookmarkItem({ bookmark, onDelete }: BookmarkItemProps) {
                     className="text-sm text-muted-foreground hover:text-accent truncate block flex items-center gap-1 transition-colors font-mono"
                     title={bookmark.url}
                 >
-                    {new URL(bookmark.url).hostname}
+                    {(() => { try { return new URL(bookmark.url).hostname; } catch { return bookmark.url; } })()}
                     <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </a>
             </div>

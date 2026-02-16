@@ -1,13 +1,16 @@
 "use client";
 
-import { createClient } from "@/lib/supabase/client";
 import { BookmarkFormData, bookmarkSchema } from "@/lib/validation";
 import { Loader2, Plus } from "lucide-react";
 import { useState } from "react";
 import { ZodError } from "zod";
 import { Button } from "@/components/ui/Button";
 
-export function AddBookmarkForm() {
+interface AddBookmarkFormProps {
+    onAdd: (title: string, url: string) => Promise<unknown>;
+}
+
+export function AddBookmarkForm({ onAdd }: AddBookmarkFormProps) {
     const [formData, setFormData] = useState<BookmarkFormData>({ title: "", url: "" });
     const [errors, setErrors] = useState<Partial<BookmarkFormData>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -23,7 +26,7 @@ export function AddBookmarkForm() {
         } catch (error) {
             if (error instanceof ZodError) {
                 const fieldErrors: Partial<BookmarkFormData> = {};
-                (error as any).errors.forEach((err: { path: (string | number)[]; message: string }) => {
+                error.issues.forEach((err) => {
                     if (err.path[0]) {
                         fieldErrors[err.path[0] as keyof BookmarkFormData] = err.message;
                     }
@@ -34,28 +37,13 @@ export function AddBookmarkForm() {
             }
         }
 
-        // 2. Submit to Supabase
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-
-        if (!user) {
-            alert("You must be logged in to add a bookmark");
-            window.location.href = "/";
-            return;
-        }
-
-        const { error } = await supabase.from("bookmarks").insert({
-            title: formData.title,
-            url: formData.url,
-            user_id: user.id
-        });
-
-        if (error) {
+        // 2. Submit via the parent hook's addBookmark (optimistic update)
+        try {
+            await onAdd(formData.title, formData.url);
+            setFormData({ title: "", url: "" });
+        } catch (error) {
             console.error("Error adding bookmark:", error);
             alert("Failed to add bookmark. Please try again.");
-        } else {
-            // Reset form on success
-            setFormData({ title: "", url: "" });
         }
 
         setIsSubmitting(false);

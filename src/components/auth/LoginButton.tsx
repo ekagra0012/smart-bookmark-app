@@ -25,8 +25,7 @@ export function LoginButton() {
         } catch (error) {
             console.error("Login failed:", error);
             alert("Login failed. Please check console for details.");
-        } finally {
-            if (!loading) setLoading(false);
+            setLoading(false);
         }
     };
 
