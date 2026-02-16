@@ -10,6 +10,7 @@ export function useRealtimeBookmarks() {
     const [loading, setLoading] = useState(true);
     const supabaseRef = useRef<SupabaseClient | null>(null);
     const channelRef = useRef<RealtimeChannel | null>(null);
+    const subscribedRef = useRef(false);
 
     // Initialize Supabase client once
     if (!supabaseRef.current) {
@@ -18,6 +19,7 @@ export function useRealtimeBookmarks() {
 
     useEffect(() => {
         const supabase = supabaseRef.current!;
+        subscribedRef.current = false;
 
         // 1. Fetch initial data
         const fetchBookmarks = async () => {
@@ -36,7 +38,7 @@ export function useRealtimeBookmarks() {
 
         fetchBookmarks();
 
-        // 2. Subscribe to cross-tab Broadcast channel + Postgres Changes
+        // 2. Build the channel with Broadcast + Postgres Changes listeners
         const channel = supabase
             .channel("bookmark-sync")
             .on("broadcast", { event: "bookmark-added" }, (payload) => {
@@ -61,7 +63,6 @@ export function useRealtimeBookmarks() {
                 },
                 (payload) => {
                     console.log("Postgres Changes event received:", payload);
-                    // Fallback for changes from external sources (e.g., DB admin)
                     if (payload.eventType === "INSERT") {
                         const newBookmark = payload.new as Bookmark;
                         setBookmarks((prev) => {
@@ -81,15 +82,19 @@ export function useRealtimeBookmarks() {
                         );
                     }
                 }
-            )
-            .subscribe((status) => {
-                console.log("Realtime subscription status:", status);
-            });
+            );
 
-        // Store channel ref so addBookmark/deleteBookmark can use it
+        // Store channel ref BEFORE subscribing so it's available immediately
         channelRef.current = channel;
 
+        // Now subscribe and track readiness
+        channel.subscribe((status) => {
+            console.log("Realtime subscription status:", status);
+            subscribedRef.current = status === "SUBSCRIBED";
+        });
+
         return () => {
+            subscribedRef.current = false;
             channelRef.current = null;
             supabase.removeChannel(channel);
         };
@@ -120,11 +125,16 @@ export function useRealtimeBookmarks() {
             });
 
             // Broadcast to other tabs via the shared channel
-            channelRef.current?.send({
-                type: "broadcast",
-                event: "bookmark-added",
-                payload: data,
-            });
+            if (channelRef.current && subscribedRef.current) {
+                const status = await channelRef.current.send({
+                    type: "broadcast",
+                    event: "bookmark-added",
+                    payload: data,
+                });
+                console.log("Broadcast 'bookmark-added' sent:", status);
+            } else {
+                console.warn("Skipping broadcast: Channel not subscribed or missing");
+            }
         }
 
         return data;
@@ -136,11 +146,16 @@ export function useRealtimeBookmarks() {
         setBookmarks((prev) => prev.filter((b) => b.id !== id));
 
         // Broadcast to other tabs immediately via the shared channel
-        channelRef.current?.send({
-            type: "broadcast",
-            event: "bookmark-deleted",
-            payload: { id },
-        });
+        if (channelRef.current && subscribedRef.current) {
+            const status = await channelRef.current.send({
+                type: "broadcast",
+                event: "bookmark-deleted",
+                payload: { id },
+            });
+            console.log("Broadcast 'bookmark-deleted' sent:", status);
+        } else {
+            console.warn("Skipping broadcast: Channel not subscribed or missing");
+        }
 
         const supabase = supabaseRef.current!;
         const { error } = await supabase.from("bookmarks").delete().eq("id", id);
