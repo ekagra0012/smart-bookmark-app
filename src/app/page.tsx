@@ -1,10 +1,20 @@
 import { LoginButton } from "@/components/auth/LoginButton";
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
-export default function Home() {
+export default async function Home() {
+  // Redirect authenticated users directly to dashboard
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (user) {
+    redirect("/dashboard");
+  }
+
   return (
     <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
       {/* Abstract background elements */}
-      <div className="absolute top-0 left-0 w-full h-96 bg-card/50 blur-3xl -z-10 rounded-b-[50%]" />
+      <div className="absolute top-0 left-0 w-full h-96 bg-card/50 blur-3xl -z-10 rounded-b-[50%]" aria-hidden="true" />
 
       <main className="flex-1 flex flex-col items-center justify-center p-6 text-center z-10">
         <div className="max-w-3xl space-y-12">

@@ -306,19 +306,23 @@ The application implements a defense-in-depth security strategy across multiple 
 
 ## Real-time Synchronization
 
-The real-time synchronization feature is implemented through a custom React hook (`useRealtimeBookmarks`) that manages a persistent WebSocket connection to the Supabase Realtime service.
+The real-time synchronization feature is implemented through a custom React hook (`useRealtimeBookmarks`) that uses a **hybrid Broadcast + Postgres Changes** strategy for reliable cross-tab updates.
 
 **How it works:**
 
-1. On dashboard mount, the hook establishes a WebSocket subscription to the `bookmarks` table, filtered by the authenticated user's ID.
-2. When a bookmark is added or deleted in any tab, Supabase PostgreSQL emits a change event via the Realtime publication.
-3. The WebSocket subscription receives the event and updates the local React state, triggering a re-render.
-4. The UI reflects the change across all open tabs without any manual page refresh.
+1. On dashboard mount, the hook establishes a Supabase Realtime channel subscribed to both **Broadcast** events and **Postgres Changes**.
+2. When a bookmark is added or deleted, the action is applied locally (optimistic update) and explicitly **broadcasted** to all other open tabs via the shared channel.
+3. Other tabs receive the Broadcast event instantly and update their local React state, triggering a re-render.
+4. **Postgres Changes** serves as a fallback, catching any database-level modifications made outside the application (e.g., from the Supabase dashboard or API).
 
-**Event types handled:**
-- `INSERT` -- A new bookmark is appended to the list.
-- `DELETE` -- The removed bookmark is filtered out of the list.
-- `UPDATE` -- The modified bookmark record is replaced in-place.
+**Broadcast events handled:**
+- `bookmark-added` — A new bookmark is appended to the list across all tabs.
+- `bookmark-deleted` — The removed bookmark is filtered out of the list across all tabs.
+
+**Postgres Changes events handled (fallback):**
+- `INSERT` — Appends new bookmark (deduplicated against Broadcast).
+- `DELETE` — Removes bookmark by ID.
+- `UPDATE` — Replaces modified bookmark record in-place.
 
 ---
 
@@ -340,7 +344,7 @@ The real-time synchronization feature is implemented through a custom React hook
 
 **Problem:** Ensuring the UI updates instantly across multiple browser tabs without manual refreshing or polling, while handling edge cases such as network interruptions and simultaneous operations.
 
-**Solution:** Implemented the `useRealtimeBookmarks` custom hook that subscribes to Supabase `postgres_changes` events. The hook uses optimistic updates for immediate visual feedback and reconciles with the server-authoritative state on event receipt. Connection status is monitored, and the subscription automatically reconnects on network recovery.
+**Solution:** Implemented a hybrid synchronization strategy in the `useRealtimeBookmarks` custom hook. The primary mechanism uses Supabase **Broadcast** events to explicitly notify all open tabs of changes. A secondary **Postgres Changes** listener provides a fallback for external database modifications. The hook uses optimistic updates for immediate visual feedback, deduplicates events to prevent double-rendering, and maintains a single shared channel reference for consistent send/receive behavior.
 
 ### 4. Input Validation and Edge Cases
 
