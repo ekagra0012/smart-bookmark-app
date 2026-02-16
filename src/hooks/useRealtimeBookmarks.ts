@@ -1,3 +1,5 @@
+"use client";
+
 import { createClient } from "@/lib/supabase/client";
 import { Bookmark } from "@/types/bookmark";
 import { useEffect, useState } from "react";

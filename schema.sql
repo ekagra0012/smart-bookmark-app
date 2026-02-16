@@ -49,3 +49,7 @@ EXECUTE PROCEDURE handle_updated_at();
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS bookmarks_user_id_idx ON bookmarks(user_id);
 CREATE INDEX IF NOT EXISTS bookmarks_created_at_idx ON bookmarks(created_at DESC);
+
+-- Enable Realtime
+alter publication supabase_realtime add table bookmarks;
+ALTER TABLE bookmarks REPLICA IDENTITY FULL;

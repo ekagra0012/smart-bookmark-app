@@ -1,8 +1,11 @@
+"use client";
+
 import { createClient } from "@/lib/supabase/client";
 import { BookmarkFormData, bookmarkSchema } from "@/lib/validation";
 import { Loader2, Plus } from "lucide-react";
 import { useState } from "react";
 import { ZodError } from "zod";
+import { Button } from "@/components/ui/Button";
 
 export function AddBookmarkForm() {
     const [formData, setFormData] = useState<BookmarkFormData>({ title: "", url: "" });
@@ -20,7 +23,7 @@ export function AddBookmarkForm() {
         } catch (error) {
             if (error instanceof ZodError) {
                 const fieldErrors: Partial<BookmarkFormData> = {};
-                error.errors.forEach((err) => {
+                (error as any).errors.forEach((err: { path: (string | number)[]; message: string }) => {
                     if (err.path[0]) {
                         fieldErrors[err.path[0] as keyof BookmarkFormData] = err.message;
                     }
@@ -59,37 +62,38 @@ export function AddBookmarkForm() {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="bg-gray-800 rounded-xl p-6 border border-gray-700 shadow-xl mb-8">
+        <form onSubmit={handleSubmit} className="bg-card text-card-foreground rounded-2xl p-8 shadow-sm border border-border/50 mb-12">
+            <h3 className="font-serif text-2xl mb-6">Add New Bookmark</h3>
             <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1 space-y-1">
                     <input
                         type="text"
-                        placeholder="Bookmark Title"
+                        placeholder="Title"
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                        className={`w-full bg-gray-900 border ${errors.title ? 'border-red-500' : 'border-gray-600'} rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all`}
+                        className={`w-full bg-background border ${errors.title ? 'border-red-500' : 'border-input'} rounded-lg px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring transition-all`}
                     />
-                    {errors.title && <p className="text-red-400 text-xs px-1">{errors.title}</p>}
+                    {errors.title && <p className="text-red-500 text-xs px-1">{errors.title}</p>}
                 </div>
 
                 <div className="flex-1 space-y-1">
                     <input
                         type="url"
-                        placeholder="https://example.com"
+                        placeholder="URL (https://...)"
                         value={formData.url}
                         onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                        className={`w-full bg-gray-900 border ${errors.url ? 'border-red-500' : 'border-gray-600'} rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all`}
+                        className={`w-full bg-background border ${errors.url ? 'border-red-500' : 'border-input'} rounded-lg px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring transition-all`}
                     />
-                    {errors.url && <p className="text-red-400 text-xs px-1">{errors.url}</p>}
+                    {errors.url && <p className="text-red-500 text-xs px-1">{errors.url}</p>}
                 </div>
 
-                <button
+                <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg px-6 py-3 flex items-center justify-center gap-2 transition-colors disabled:opacity-70 disabled:cursor-not-allowed min-w-[120px]"
+                    className="min-w-[120px]"
                 >
-                    {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Plus className="w-5 h-5" /> Add</>}
-                </button>
+                    {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Plus className="w-5 h-5 mr-2" /> Add</>}
+                </Button>
             </div>
         </form>
     );

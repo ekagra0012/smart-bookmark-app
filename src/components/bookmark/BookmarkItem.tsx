@@ -1,7 +1,9 @@
+"use client";
+
 import { Trash2, ExternalLink } from "lucide-react";
 import { Bookmark } from "@/types/bookmark";
 import { useState } from "react";
-import clsx from "clsx";
+import { cn } from "@/lib/utils";
 
 interface BookmarkItemProps {
     bookmark: Bookmark;
@@ -26,33 +28,33 @@ export function BookmarkItem({ bookmark, onDelete }: BookmarkItemProps) {
 
     return (
         <div
-            className={clsx(
-                "bg-gray-800/80 backdrop-blur-sm border border-gray-700 rounded-lg p-4 flex items-center justify-between transition-all hover:bg-gray-800 hover:border-blue-500/50 group",
+            className={cn(
+                "group relative bg-card text-card-foreground border border-border/40 rounded-xl p-6 transition-all hover:shadow-md hover:border-border/80",
                 isDeleting && "opacity-50 pointer-events-none"
             )}
         >
-            <div className="flex-1 min-w-0 mr-4">
-                <h3 className="text-white font-medium truncate" title={bookmark.title}>
+            <div className="flex-1 min-w-0 pr-8">
+                <h3 className="font-serif text-lg font-medium truncate mb-2 text-primary" title={bookmark.title}>
                     {bookmark.title}
                 </h3>
                 <a
                     href={bookmark.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-gray-400 hover:text-blue-400 truncate block flex items-center gap-1 transition-colors"
+                    className="text-sm text-muted-foreground hover:text-accent truncate block flex items-center gap-1 transition-colors font-mono"
                     title={bookmark.url}
                 >
-                    {bookmark.url}
-                    <ExternalLink className="w-3 h-3 inline-block opacity-0 group-hover:opacity-100 transition-opacity" />
+                    {new URL(bookmark.url).hostname}
+                    <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </a>
             </div>
             <button
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="text-gray-500 hover:text-red-400 p-2 rounded-full hover:bg-white/5 transition-colors"
+                className="absolute top-4 right-4 text-muted-foreground hover:text-destructive p-2 rounded-full hover:bg-muted transition-colors opacity-0 group-hover:opacity-100"
                 title="Delete Bookmark"
             >
-                <Trash2 className="w-5 h-5" />
+                <Trash2 className="w-4 h-4" />
             </button>
         </div>
     );
