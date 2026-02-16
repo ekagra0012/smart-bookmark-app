@@ -48,12 +48,12 @@ export default async function DashboardPage() {
 
                         <form action="/auth/signout" method="post">
                             <button
-                                className="inline-flex items-center justify-center rounded-full text-sm font-medium text-muted-foreground transition-colors hover:text-primary hover:bg-secondary w-9 h-9"
+                                className="inline-flex items-center justify-center gap-2 rounded-full text-sm font-medium text-muted-foreground transition-colors hover:text-primary hover:bg-secondary px-4 h-9 border border-border"
                                 type="submit"
                                 title="Sign out"
                             >
                                 <LogOut className="w-4 h-4" />
-                                <span className="sr-only">Sign out</span>
+                                <span className="hidden sm:inline">Sign Out</span>
                             </button>
                         </form>
                     </div>
