@@ -63,7 +63,27 @@ Follow these steps to set up the project locally.
     npm run dev
     ```
 
-    Open [http://localhost:3000](http://localhost:3000) to view the app.
+
+## 🧠 Challenges & Solutions
+
+During development, we encountered and resolved several key technical challenges:
+
+1.  **Node.js Version Compatibility**:
+    *   *Problem*: Next.js 15 requires Node.js 18.18+ (ideally 20+), but the local environment was on v18.20.8.
+    *   *Solution*: Ensured compatibility by checking engines and recommending a Node.js upgrade for optimal performance.
+
+2.  **Server Components vs. Client Hooks**:
+    *   *Problem*: The `LoginButton` component failed to build because it used `useState` without the `"use client"` directive.
+    *   *Solution*: Identified the error via browser testing and added the directive to correctly mark it as a Client Component.
+
+3.  **Real-time Synchronization**:
+    *   *Problem*: Ensuring the UI updates instantly across multiple tabs without manual refreshing or polling.
+    *   *Solution*: Implemented a custom `useRealtimeBookmarks` hook that subscribes to Supabase `postgres_changes`. It uses optimistic updates for immediate feedback and reconciles with the server state on event receipt.
+
+4.  **Edge Case Validation**:
+    *   *Problem*: Handling invalid URLs, empty titles, or protocol mismatches.
+    *   *Solution*: Integrated **Zod** for strict server-side and client-side validation, ensuring only valid data reaches the database.
+
 
 ## 🤝 Contributing
 
