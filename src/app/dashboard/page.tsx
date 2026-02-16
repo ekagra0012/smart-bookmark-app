@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 // We import the client-side component here
 import { BookmarkList } from '@/components/bookmark/BookmarkList'
+import { LogOut, User } from 'lucide-react'
 
 export default async function DashboardPage() {
     const supabase = await createClient()
@@ -15,46 +16,54 @@ export default async function DashboardPage() {
     }
 
     return (
-        <div className="flex flex-col min-h-screen bg-gray-900 text-gray-100">
-            <header className="flex justify-between items-center px-6 py-4 bg-gray-800/50 backdrop-blur-md border-b border-gray-700 sticky top-0 z-50">
-                <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center font-bold text-white">
-                        S
-                    </div>
-                    <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400 hidden sm:block">
-                        SmartMarks
-                    </h1>
-                </div>
-
-                <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 text-right">
-                        <span className="text-xs text-gray-400 hidden sm:block">
-                            {user.email}
-                        </span>
-                        {user.user_metadata.avatar_url && (
-                            <img
-                                src={user.user_metadata.avatar_url}
-                                alt="Avatar"
-                                className="w-8 h-8 rounded-full border border-gray-600"
-                            />
-                        )}
+        <div className="flex flex-col min-h-screen bg-background text-foreground">
+            <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md">
+                <div className="container flex h-16 items-center justify-between px-6 mx-auto max-w-5xl">
+                    <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center font-serif font-bold text-primary-foreground text-lg">
+                            S
+                        </div>
+                        <h1 className="font-serif text-xl font-medium tracking-tight hidden sm:block">
+                            SmartMarks
+                        </h1>
                     </div>
 
-                    <form action="/auth/signout" method="post">
-                        <button
-                            className="text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 px-3 py-1.5 rounded-md transition-all"
-                            type="submit"
-                        >
-                            Sign out
-                        </button>
-                    </form>
+                    <div className="flex items-center gap-6">
+                        <div className="flex items-center gap-3 text-right">
+                            <span className="text-sm font-medium text-muted-foreground hidden sm:block">
+                                {user.email}
+                            </span>
+                            {user.user_metadata.avatar_url ? (
+                                <img
+                                    src={user.user_metadata.avatar_url}
+                                    alt="Avatar"
+                                    className="w-9 h-9 rounded-full border border-border"
+                                />
+                            ) : (
+                                <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center border border-border">
+                                    <User className="w-4 h-4 text-secondary-foreground" />
+                                </div>
+                            )}
+                        </div>
+
+                        <form action="/auth/signout" method="post">
+                            <button
+                                className="inline-flex items-center justify-center rounded-full text-sm font-medium text-muted-foreground transition-colors hover:text-primary hover:bg-secondary w-9 h-9"
+                                type="submit"
+                                title="Sign out"
+                            >
+                                <LogOut className="w-4 h-4" />
+                                <span className="sr-only">Sign out</span>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </header>
 
-            <main className="flex-1 p-4 md:p-8 max-w-4xl mx-auto w-full">
-                <div className="mb-8">
-                    <h2 className="text-2xl font-bold text-white mb-2">Your Bookmarks</h2>
-                    <p className="text-gray-400">Manage and sync your favorite links across devices.</p>
+            <main className="flex-1 w-full max-w-5xl mx-auto p-6 md:py-12">
+                <div className="mb-10 text-center md:text-left">
+                    <h2 className="text-4xl font-serif font-medium text-primary mb-3">Your Collection</h2>
+                    <p className="text-lg text-muted-foreground font-light">Manage and organize your digital footprint.</p>
                 </div>
 
                 <BookmarkList />

@@ -2,26 +2,38 @@ import { LoginButton } from "@/components/auth/LoginButton";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-black flex flex-col items-center justify-center p-4">
-      <div className="max-w-md w-full text-center space-y-8">
-        <div className="space-y-4">
-          <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
-            SmartMarks
-          </h1>
-          <p className="text-gray-300 text-lg">
-            Your bookmarks, everywhere. Real-time synchronization across all your devices.
-          </p>
-        </div>
+    <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
+      {/* Abstract background elements */}
+      <div className="absolute top-0 left-0 w-full h-96 bg-card/50 blur-3xl -z-10 rounded-b-[50%]" />
 
-        <div className="bg-white/10 backdrop-blur-lg rounded-xl p-8 shadow-2xl border border-white/20">
+      <main className="flex-1 flex flex-col items-center justify-center p-6 text-center z-10">
+        <div className="max-w-3xl space-y-12">
           <div className="space-y-6">
+            <div className="inline-block px-4 py-1.5 rounded-full bg-secondary text-secondary-foreground text-sm font-medium tracking-wide">
+              The Intelligent Bookmark Manager
+            </div>
+            <h1 className="text-6xl md:text-7xl lg:text-8xl font-serif font-medium text-primary tracking-tight leading-tight">
+              Curate your <br />
+              <span className="italic">digital knowledge</span>
+            </h1>
+            <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto font-light leading-relaxed">
+              Capture, organize, and access your bookmarks with AI-powered precision.
+              Designed for the modern web.
+            </p>
+          </div>
+
+          <div className="flex flex-col items-center gap-4">
             <LoginButton />
-            <p className="text-xs text-gray-400">
-              By signing in, you agree to our Terms of Service.
+            <p className="text-xs text-muted-foreground tracking-widest uppercase">
+              Secure Access • Real-time Sync
             </p>
           </div>
         </div>
-      </div>
+      </main>
+
+      <footer className="py-8 text-center text-sm text-muted-foreground border-t border-border/40">
+        <p>&copy; {new Date().getFullYear()} SmartMarks. All rights reserved.</p>
+      </footer>
     </div>
   );
 }
