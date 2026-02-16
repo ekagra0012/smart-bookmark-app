@@ -1,8 +1,8 @@
-// File: /Users/ekagra/Smart_Bookmark_App/src/app/auth/callback/route.ts
-import * as entry from '../../../../../src/app/auth/callback/route.js'
+// File: /Users/ekagra/Smart_Bookmark_App/src/app/auth/signout/route.ts
+import * as entry from '../../../../../src/app/auth/signout/route.js'
 import type { NextRequest } from 'next/server.js'
 
-type TEntry = typeof import('../../../../../src/app/auth/callback/route.js')
+type TEntry = typeof import('../../../../../src/app/auth/signout/route.js')
 
 type SegmentParams<T extends Object = any> = T extends Record<string, any>
   ? { [K in keyof T]: T[K] extends string ? string | string[] | undefined : never }

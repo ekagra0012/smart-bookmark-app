@@ -1,4 +1,4 @@
-// File: /Users/ekagra/Smart_Bookmark_App/smart-bookmark-app/src/app/layout.tsx
+// File: /Users/ekagra/Smart_Bookmark_App/src/app/layout.tsx
 import * as entry from '../../../src/app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
