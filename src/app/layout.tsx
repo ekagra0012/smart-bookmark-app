@@ -1,13 +1,28 @@
 import type { Metadata } from "next";
-import { Inter, Outfit } from "next/font/google";
+import { Inter, Playfair_Display, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+  display: "swap",
+});
+
+const jetbrains = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-jetbrains",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-  title: "Smart Bookmark App",
-  description: "Real-time bookmark manager",
+  title: "SmartMarks - The Intelligent Bookmark Manager",
+  description: "Organize your digital life with AI-powered bookmarking.",
 };
 
 export default function RootLayout({
@@ -16,8 +31,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.variable} ${outfit.variable} font-sans antialiased bg-gray-900 text-white`}>
+    <html lang="en" className={`${inter.variable} ${playfair.variable} ${jetbrains.variable}`}>
+      <body className="font-sans antialiased bg-background text-foreground min-h-screen">
         {children}
       </body>
     </html>

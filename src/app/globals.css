@@ -1,20 +1,37 @@
 @import "tailwindcss";
 
 :root {
+  /* Rogo.ai inspired palette */
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #1a1a1a;
+
+  --card: #F5F2EB;
+  /* Warm Beige */
+  --card-foreground: #1a1a1a;
+
+  --primary: #151515;
+  /* Deep Charcoal */
+  --primary-foreground: #ffffff;
+
+  --secondary: #F5F2EB;
+  --secondary-foreground: #1a1a1a;
+
+  --accent: #168C67;
+  /* Emerald Green */
+  --accent-foreground: #ffffff;
+
+  --muted: #f4f4f5;
+  --muted-foreground: #737373;
+
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #151515;
 }
 
 @theme {
+  --font-serif: var(--font-playfair);
   --font-sans: var(--font-inter);
-  --font-display: var(--font-outfit);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-mono: var(--font-jetbrains);
 }
 
 body {
@@ -23,6 +40,13 @@ body {
   font-family: var(--font-sans), sans-serif;
 }
 
-h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-display), sans-serif;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-serif), serif;
+  font-weight: 500;
+  letter-spacing: -0.02em;
 }
